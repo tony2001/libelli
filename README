@@ -1,0 +1,2 @@
+libelli - high level elliptic cryptography library using OpenSSL.
+Heavily based on Ladar Levison's ECIES module code.

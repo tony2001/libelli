@@ -3,6 +3,7 @@ Makefile
 Makefile.in
 config.guess
 config.sub
+config.nice
 acconfig.h
 aclocal.m4
 autom4te.cache

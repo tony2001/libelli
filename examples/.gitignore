@@ -1,0 +1,8 @@
+.libs
+.deps
+
+example1
+example2
+*.o
+*.lo
+*.in

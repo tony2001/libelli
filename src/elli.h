@@ -8,19 +8,15 @@
 
 /* Based on Ladar Levison's ECIES module code. */
 
-//#define ECIES_CURVE NID_secp521r1
-#define ECIES_CURVE NID_secp112r1
-#define ECIES_CIPHER EVP_aes_256_cbc()
-
-typedef enum {
-	ELLI_secp160r1
-} elli_curve_t;
+#define ECIES_DEFAULT_CURVE NID_secp521r1
+//#define ECIES_CURVE NID_secp112r1
+#define ECIES_DEFAULT_CIPHER EVP_aes_256_cbc()
 
 typedef char* verbum_t;
 typedef char* elli_ctx_t;
 uint64_t verbum_total_length(verbum_t *encrypted);
 
-elli_ctx_t *elli_ctx_create();
+elli_ctx_t *elli_ctx_create(const char *curve_name);
 char *elli_ctx_last_error(elli_ctx_t *ctx);
 void elli_ctx_free(elli_ctx_t *ctx);
 

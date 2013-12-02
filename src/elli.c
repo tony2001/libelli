@@ -11,13 +11,20 @@ static inline void *elli_key_derivation(const void *input, size_t ilen, void *ou
 }
 /* }}} */
 
-elli_ctx_t *elli_ctx_create() /* {{{ */
+elli_ctx_t *elli_ctx_create(const char *curve_name) /* {{{ */
 {
 	elli_ctx_internal_t *int_ctx;
+	int curve;
+
+	curve = OBJ_sn2nid(curve_name);
+
+	if (curve == NID_undef) {
+		curve = ECIES_DEFAULT_CURVE;
+	}
 
 	int_ctx = calloc(1, sizeof(*int_ctx));
-	int_ctx->curve_type = ECIES_CURVE;
-	int_ctx->cipher = ECIES_CIPHER;
+	int_ctx->curve_type = curve;
+	int_ctx->cipher = ECIES_DEFAULT_CIPHER;
 	if (!elli_group_init(int_ctx)) {
 		fprintf(stderr, "%s", int_ctx->last_error);
 		free(int_ctx);

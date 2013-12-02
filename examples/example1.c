@@ -10,7 +10,7 @@ int main()
 	unsigned char *dec_data;
 	size_t dec_data_len;
 
-	ctx = elli_ctx_create();
+	ctx = elli_ctx_create("secp112r1");
 	encrypted_data = elli_encrypt(ctx, pub_key, (unsigned char *)"test", sizeof("test") - 1);
 
 	if (!encrypted_data) {
@@ -22,6 +22,7 @@ int main()
 	dec_data = elli_decrypt(ctx, priv_key, encrypted_data, &dec_data_len);
 	if (dec_data) {
 		printf("%s\n", dec_data);
+		free(dec_data);
 	} else {
 		printf("Failed to decode data. Error: %s\n", elli_ctx_last_error(ctx));
 	}

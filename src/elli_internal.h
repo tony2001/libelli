@@ -23,8 +23,7 @@ typedef struct {
 
 typedef struct {
 	int curve_type;
-	EVP_CIPHER *cipher;
-	EVP_MD *hasher;
+	const EVP_CIPHER *cipher;
 	EC_GROUP *elliptic;
 	char last_error[1024];
 } elli_ctx_internal_t;

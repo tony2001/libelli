@@ -1,0 +1,7 @@
+Private-Key: (112 bit)
+priv:
+    1e:da:26:7d:14:9d:a0:fa:5d:8a:df:32:51:bf
+pub: 
+    04:6f:f5:ef:14:73:2c:48:f4:e8:9d:97:22:ba:c1:
+    c1:a5:c2:76:79:d6:23:79:35:16:01:a1:fb:54
+ASN1 OID: secp112r1

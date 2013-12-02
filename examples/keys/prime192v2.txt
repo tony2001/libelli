@@ -1,0 +1,10 @@
+Private-Key: (192 bit)
+priv:
+    03:96:a3:d5:e8:1f:2d:14:5e:70:0c:6a:2b:68:f9:
+    1a:2b:55:68:01:7a:0f:fa:fa
+pub: 
+    04:82:16:4c:46:af:b9:3f:e0:f9:29:e7:a4:d9:6c:
+    72:2f:8a:ab:f6:fa:1e:f8:fc:dd:66:c2:56:b3:f8:
+    20:04:8c:c1:46:26:3e:9a:1c:50:ab:54:6d:ea:55:
+    04:8c:60:91
+ASN1 OID: prime192v2

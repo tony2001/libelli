@@ -1,0 +1,10 @@
+Private-Key: (189 bit)
+priv:
+    01:bc:fb:28:e1:31:2a:34:e7:3a:ca:85:04:d3:e8:
+    28:c5:e5:66:b3:5d:18:85:c1
+pub: 
+    04:3a:e9:bd:0e:cb:03:33:89:f8:c7:7a:52:11:9f:
+    60:ef:e9:41:7a:ed:5f:8e:e6:e3:35:e7:45:98:fc:
+    08:a2:5d:89:ef:7c:a5:5b:9a:b1:04:3c:29:08:f7:
+    67:5e:ee:2a
+ASN1 OID: c2tnb191v3

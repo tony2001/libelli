@@ -1,0 +1,9 @@
+Private-Key: (161 bit)
+priv:
+    78:d9:d7:e3:82:bd:07:26:c8:46:b1:b0:43:61:e7:
+    32:c2:b2:95:0a
+pub: 
+    04:5e:18:ef:6f:18:09:ac:04:45:85:c0:3e:fd:36:
+    09:23:22:a5:12:a6:4b:bb:09:f8:bf:54:9c:91:39:
+    d6:4c:1d:4f:8c:b9:3f:b0:b1:18:dc
+ASN1 OID: wap-wsg-idm-ecid-wtls9

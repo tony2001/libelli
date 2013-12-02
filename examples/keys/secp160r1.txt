@@ -1,0 +1,9 @@
+Private-Key: (161 bit)
+priv:
+    01:f8:0f:2b:b6:e9:9e:6c:34:34:16:7b:8e:7f:66:
+    2b:83:7f:f6:79
+pub: 
+    04:4b:9e:9c:cb:9c:00:41:5c:a5:d3:2e:23:7d:3d:
+    4f:95:89:5b:c5:a5:f0:66:a5:a0:7d:f3:0b:bc:f1:
+    a0:52:25:d0:fc:71:50:09:12:a7:b5
+ASN1 OID: secp160r1

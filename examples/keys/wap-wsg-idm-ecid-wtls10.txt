@@ -1,0 +1,11 @@
+Private-Key: (232 bit)
+priv:
+    27:a3:cf:c4:a0:22:82:df:a1:7f:1c:1f:e1:72:e4:
+    1d:3a:f5:f9:d0:f2:65:ec:5f:84:8d:3e:54:79
+pub: 
+    04:01:31:6c:f9:f1:f6:23:b2:5c:88:61:d0:64:60:
+    b7:f2:9e:c1:11:56:5b:7d:ac:22:7c:21:82:08:bf:
+    7a:00:66:bf:f9:7f:b6:73:27:80:76:a5:d5:69:6a:
+    df:be:6d:e2:bb:ef:eb:d5:c6:65:66:69:bf:a9:d6:
+    e0
+ASN1 OID: wap-wsg-idm-ecid-wtls10

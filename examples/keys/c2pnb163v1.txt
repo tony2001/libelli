@@ -1,0 +1,9 @@
+Private-Key: (163 bit)
+priv:
+    01:ae:b6:78:55:4c:da:c4:34:16:9f:aa:de:59:49:
+    87:a5:78:15:ae:3f
+pub: 
+    04:07:4c:34:92:29:b4:5a:94:d0:d6:6b:dd:4f:b2:
+    f2:57:1f:5d:96:7e:a1:05:e1:9e:3f:1b:03:5e:8b:
+    01:c7:85:1b:d4:9b:33:1b:0d:79:ef:2f:e7
+ASN1 OID: c2pnb163v1

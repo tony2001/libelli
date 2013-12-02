@@ -1,0 +1,9 @@
+Private-Key: (162 bit)
+priv:
+    1e:bf:f0:23:c1:17:bf:a7:19:8c:bb:77:de:f8:31:
+    5a:4d:3a:38:2c
+pub: 
+    04:03:d4:fb:b3:87:7b:05:2d:2a:8f:37:b9:04:d9:
+    00:ba:cc:02:39:2d:8f:00:fb:e8:0a:ab:bc:be:d7:
+    89:d6:13:49:39:66:c8:1e:9b:ae:04:7c:04
+ASN1 OID: sect163r1

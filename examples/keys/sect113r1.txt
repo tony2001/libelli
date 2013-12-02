@@ -1,0 +1,8 @@
+Private-Key: (113 bit)
+priv:
+    00:9d:a6:83:e7:ad:24:7a:24:c1:01:cb:90:31:59
+pub: 
+    04:00:e6:a3:56:87:46:c4:f6:3c:b7:fb:25:a8:d6:
+    7f:01:b8:6f:00:43:5c:ef:f9:6a:bd:bd:d0:b9:99:
+    d6
+ASN1 OID: sect113r1

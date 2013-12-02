@@ -1,0 +1,9 @@
+Private-Key: (131 bit)
+priv:
+    00:c5:63:1b:ce:fd:79:dd:70:c9:81:88:36:50:88:
+    d9:31
+pub: 
+    04:07:bf:30:77:f7:cf:88:b7:37:06:62:c8:aa:d2:
+    51:76:e9:02:c1:45:ac:ad:eb:8e:af:ec:44:a6:b1:
+    64:c5:e0:af:10
+ASN1 OID: sect131r2

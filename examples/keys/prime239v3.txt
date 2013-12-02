@@ -1,0 +1,11 @@
+Private-Key: (239 bit)
+priv:
+    47:e1:58:c5:11:df:9d:79:67:d4:f8:b3:a9:bf:8c:
+    97:ea:5f:0b:57:38:ea:4d:df:3f:71:38:12:68:51
+pub: 
+    04:6d:37:25:11:cf:32:60:fb:03:a0:b7:c4:49:64:
+    0c:6d:cd:df:ee:b4:77:08:43:5a:ba:ab:87:a6:f7:
+    e3:5e:0e:1b:7a:c8:5d:db:19:ad:d2:ee:bd:b2:6c:
+    31:32:08:2e:06:e0:f4:6b:ed:16:e3:79:56:2d:8d:
+    5a
+ASN1 OID: prime239v3

@@ -1,0 +1,9 @@
+Private-Key: (128 bit)
+priv:
+    00:ab:38:da:5f:40:db:0b:20:48:94:05:da:07:55:
+    44:06
+pub: 
+    04:e3:33:ea:d5:6d:ea:86:c4:b1:6e:f9:98:66:e4:
+    c3:9a:c2:9f:cf:ff:e9:18:d2:0e:f4:fb:9c:bf:fd:
+    dc:0a:95
+ASN1 OID: secp128r1

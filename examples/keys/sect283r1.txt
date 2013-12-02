@@ -1,0 +1,12 @@
+Private-Key: (282 bit)
+priv:
+    01:20:b4:d7:ac:d2:71:2d:da:82:c5:15:73:4f:94:
+    86:2a:e6:a0:db:7c:f8:71:a4:ba:a9:ef:59:55:be:
+    bc:ec:1a:b5:fe:15
+pub: 
+    04:06:1b:cb:d9:c8:0b:9d:c0:31:59:bf:d2:12:9c:
+    ac:35:4e:bc:63:af:d4:a6:18:79:ec:a7:9b:56:46:
+    3d:7b:be:f1:01:1e:be:06:f9:ba:fa:aa:1e:72:ae:
+    ab:bd:9c:cc:0f:58:c9:81:0f:97:07:83:67:39:fd:
+    25:da:bf:46:f9:fc:d1:b7:3c:2c:0e:ff:1a
+ASN1 OID: sect283r1

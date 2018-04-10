@@ -16,7 +16,7 @@ typedef char* verbum_t;
 typedef char* elli_ctx_t;
 uint64_t verbum_total_length(verbum_t *encrypted);
 
-elli_ctx_t *elli_ctx_create(const char *curve_name);
+elli_ctx_t *elli_ctx_create(const char *curve_name, char **error_str);
 char *elli_ctx_last_error(elli_ctx_t *ctx);
 void elli_ctx_free(elli_ctx_t *ctx);
 

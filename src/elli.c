@@ -11,7 +11,7 @@ static inline void *elli_key_derivation(const void *input, size_t ilen, void *ou
 }
 /* }}} */
 
-elli_ctx_t *elli_ctx_create(const char *curve_name) /* {{{ */
+elli_ctx_t *elli_ctx_create(const char *curve_name, char **error_str) /* {{{ */
 {
 	elli_ctx_internal_t *int_ctx;
 	int curve;
@@ -26,7 +26,12 @@ elli_ctx_t *elli_ctx_create(const char *curve_name) /* {{{ */
 	int_ctx->curve_type = curve;
 	int_ctx->cipher = ECIES_DEFAULT_CIPHER;
 	if (!elli_group_init(int_ctx)) {
-		fprintf(stderr, "%s", int_ctx->last_error);
+		if (error_str) {
+			*error_str = malloc(strlen(int_ctx->last_error) + 1);
+			if (*error_str) {
+				sprintf(*error_str, "%s", int_ctx->last_error);
+			}
+		}
 		free(int_ctx);
 		return NULL;
 	}
@@ -59,10 +64,10 @@ void elli_ctx_free(elli_ctx_t *ctx) /* {{{ */
 verbum_t *elli_encrypt(elli_ctx_t *ctx, char *key, unsigned char *data, size_t length) /* {{{ */
 {
 	void *body;
-	HMAC_CTX hmac;
+	HMAC_CTX *hmac;
 	int body_length;
 	verbum_t *encrypted;
-	EVP_CIPHER_CTX cipher;
+	EVP_CIPHER_CTX *cipher;
 	unsigned int mac_length;
 	EC_KEY *user, *ephemeral;
 	size_t envelope_length, block_length, key_length;
@@ -71,7 +76,7 @@ verbum_t *elli_encrypt(elli_ctx_t *ctx, char *key, unsigned char *data, size_t l
 
 	// Simple sanity check.
 	if (!key || !data || !length) {
-		elli_error(int_ctx, "Invalid parameters passed in.\n");
+		elli_error(int_ctx, "Invalid parameters passed: key and data cannot be NULL, length must be > 0");
 		return NULL;
 	}
 
@@ -146,17 +151,17 @@ verbum_t *elli_encrypt(elli_ctx_t *ctx, char *key, unsigned char *data, size_t l
 	memset(iv, 0, EVP_MAX_IV_LENGTH);
 
 	// Setup the cipher context, the body length, and store a pointer to the body buffer location.
-	EVP_CIPHER_CTX_init(&cipher);
+	cipher = EVP_CIPHER_CTX_new();
 	body = verbum_body_data(encrypted);
 	body_length = verbum_body_length(encrypted);
 
 	// Initialize the cipher with the envelope key.
-	if (EVP_EncryptInit_ex(&cipher, int_ctx->cipher, NULL, envelope_key, iv) != 1 ||
-		EVP_CIPHER_CTX_set_padding(&cipher, 0) != 1 ||
-		EVP_EncryptUpdate(&cipher, body, &body_length, data, length - (length % block_length)) != 1) {
+	if (EVP_EncryptInit_ex(cipher, int_ctx->cipher, NULL, envelope_key, iv) != 1 ||
+		EVP_CIPHER_CTX_set_padding(cipher, 0) != 1 ||
+		EVP_EncryptUpdate(cipher, body, &body_length, data, length - (length % block_length)) != 1) {
 
 		elli_error(int_ctx, "Failed to secure the data using the chosen symmetric cipher: %s", ERR_error_string(ERR_get_error(), NULL));
-		EVP_CIPHER_CTX_cleanup(&cipher);
+		EVP_CIPHER_CTX_free(cipher);
 		free(encrypted);
 		return NULL;
 	}
@@ -167,7 +172,7 @@ verbum_t *elli_encrypt(elli_ctx_t *ctx, char *key, unsigned char *data, size_t l
 		// Make sure all that remains is a partial block, and there wasn't an error.
 		if (length - body_length >= block_length) {
 			elli_error(int_ctx, "Unable to secure the data using the chosen symmetric cipher: %s", ERR_error_string(ERR_get_error(), NULL));
-			EVP_CIPHER_CTX_cleanup(&cipher);
+			EVP_CIPHER_CTX_free(cipher);
 			free(encrypted);
 			return NULL;
 		}
@@ -180,15 +185,15 @@ verbum_t *elli_encrypt(elli_ctx_t *ctx, char *key, unsigned char *data, size_t l
 		body += body_length;
 		if ((body_length = verbum_body_length(encrypted) - body_length) < 0) {
 			elli_error(int_ctx, "The symmetric cipher overflowed");
-			EVP_CIPHER_CTX_cleanup(&cipher);
+			EVP_CIPHER_CTX_free(cipher);
 			free(encrypted);
 			return NULL;
 		}
 
 		// Pass the final partially filled data block into the cipher as a complete block. The padding will be removed during the decryption process.
-		if (EVP_EncryptUpdate(&cipher, body, &body_length, block, block_length) != 1) {
+		if (EVP_EncryptUpdate(cipher, body, &body_length, block, block_length) != 1) {
 			elli_error(int_ctx, "Unable to secure the data using the chosen symmetric cipher: %s", ERR_error_string(ERR_get_error(), NULL));
-			EVP_CIPHER_CTX_cleanup(&cipher);
+			EVP_CIPHER_CTX_free(cipher);
 			free(encrypted);
 			return NULL;
 		}
@@ -200,36 +205,36 @@ verbum_t *elli_encrypt(elli_ctx_t *ctx, char *key, unsigned char *data, size_t l
 	body_length = verbum_body_length(encrypted) - (body - verbum_body_data(encrypted));
 	if (body_length < 0) {
 		elli_error(int_ctx, "The symmetric cipher overflowed");
-		EVP_CIPHER_CTX_cleanup(&cipher);
+		EVP_CIPHER_CTX_free(cipher);
 		free(encrypted);
 		return NULL;
 	}
 
-	if (EVP_EncryptFinal_ex(&cipher, body, &body_length) != 1) {
+	if (EVP_EncryptFinal_ex(cipher, body, &body_length) != 1) {
 		elli_error(int_ctx, "Unable to secure the data using the chosen symmetric cipher: %s", ERR_error_string(ERR_get_error(), NULL));
-		EVP_CIPHER_CTX_cleanup(&cipher);
+		EVP_CIPHER_CTX_free(cipher);
 		free(encrypted);
 		return NULL;
 	}
 
-	EVP_CIPHER_CTX_cleanup(&cipher);
+	EVP_CIPHER_CTX_free(cipher);
 
 	// Generate an authenticated hash which can be used to validate the data during decryption.
-	HMAC_CTX_init(&hmac);
+	hmac = HMAC_CTX_new();
 	mac_length = verbum_mac_length(encrypted);
 
 	// At the moment we are generating the hash using encrypted data. At some point we may want to validate the original text instead.
-	if (HMAC_Init_ex(&hmac, envelope_key + key_length, key_length, EVP_sha512(), NULL) != 1 ||
-		HMAC_Update(&hmac, verbum_body_data(encrypted), verbum_body_length(encrypted)) != 1 ||
-		HMAC_Final(&hmac, verbum_mac_data(encrypted), &mac_length) != 1) {
+	if (HMAC_Init_ex(hmac, envelope_key + key_length, key_length, EVP_sha512(), NULL) != 1 ||
+		HMAC_Update(hmac, verbum_body_data(encrypted), verbum_body_length(encrypted)) != 1 ||
+		HMAC_Final(hmac, verbum_mac_data(encrypted), &mac_length) != 1) {
 
 		elli_error(int_ctx, "Unable to generate a data hash: %s", ERR_error_string(ERR_get_error(), NULL));
-		HMAC_CTX_cleanup(&hmac);
+		HMAC_CTX_free(hmac);
 		free(encrypted);
 		return NULL;
 	}
 
-	HMAC_CTX_cleanup(&hmac);
+	HMAC_CTX_free(hmac);
 
 	return encrypted;
 }
@@ -237,10 +242,10 @@ verbum_t *elli_encrypt(elli_ctx_t *ctx, char *key, unsigned char *data, size_t l
 
 unsigned char *elli_decrypt(elli_ctx_t *ctx, char *key, verbum_t *encrypted, size_t *length)  /* {{{ */
 {
-	HMAC_CTX hmac;
+	HMAC_CTX *hmac;
 	size_t key_length;
 	int output_length;
-	EVP_CIPHER_CTX cipher;
+	EVP_CIPHER_CTX *cipher;
 	EC_KEY *user, *ephemeral;
 	unsigned int mac_length = EVP_MAX_MD_SIZE;
 	unsigned char envelope_key[SHA512_DIGEST_LENGTH], iv[EVP_MAX_IV_LENGTH], md[EVP_MAX_MD_SIZE], *block, *output;
@@ -282,19 +287,19 @@ unsigned char *elli_decrypt(elli_ctx_t *ctx, char *key, verbum_t *encrypted, siz
 	EC_KEY_free(user);
 
 	// Use the authenticated hash of the ciphered data to ensure it was not modified after being encrypted.
-	HMAC_CTX_init(&hmac);
+	hmac = HMAC_CTX_new();
 
 	// At the moment we are generating the hash using encrypted data. At some point we may want to validate the original text instead.
-	if (HMAC_Init_ex(&hmac, envelope_key + key_length, key_length, EVP_sha512(), NULL) != 1 ||
-		HMAC_Update(&hmac, verbum_body_data(encrypted), verbum_body_length(encrypted)) != 1 ||
-		HMAC_Final(&hmac, md, &mac_length) != 1) {
+	if (HMAC_Init_ex(hmac, envelope_key + key_length, key_length, EVP_sha512(), NULL) != 1 ||
+		HMAC_Update(hmac, verbum_body_data(encrypted), verbum_body_length(encrypted)) != 1 ||
+		HMAC_Final(hmac, md, &mac_length) != 1) {
 
 		elli_error(int_ctx, "Unable to generate the data hash needed for validation: %s", ERR_error_string(ERR_get_error(), NULL));
-		HMAC_CTX_cleanup(&hmac);
+		HMAC_CTX_free(hmac);
 		return NULL;
 	}
 
-	HMAC_CTX_cleanup(&hmac);
+	HMAC_CTX_free(hmac);
 
 	// We can use the generated hash to ensure the encrypted data was not altered after being encrypted.
 	if (mac_length != verbum_mac_length(encrypted) ||
@@ -315,15 +320,15 @@ unsigned char *elli_decrypt(elli_ctx_t *ctx, char *key, verbum_t *encrypted, siz
 	memset(iv, 0, EVP_MAX_IV_LENGTH);
 	memset(output, 0, output_length + 1);
 
-	EVP_CIPHER_CTX_init(&cipher);
+	cipher = EVP_CIPHER_CTX_new();
 
 	// Decrypt the data using the chosen symmetric cipher.
-	if (EVP_DecryptInit_ex(&cipher, int_ctx->cipher, NULL, envelope_key, iv) != 1 ||
-		EVP_CIPHER_CTX_set_padding(&cipher, 0) != 1 ||
-		EVP_DecryptUpdate(&cipher, block, &output_length, verbum_body_data(encrypted), verbum_body_length(encrypted)) != 1) {
+	if (EVP_DecryptInit_ex(cipher, int_ctx->cipher, NULL, envelope_key, iv) != 1 ||
+		EVP_CIPHER_CTX_set_padding(cipher, 0) != 1 ||
+		EVP_DecryptUpdate(cipher, block, &output_length, verbum_body_data(encrypted), verbum_body_length(encrypted)) != 1) {
 
 		elli_error(int_ctx, "Unable to decrypt the data using the chosen symmetric cipher: %s", ERR_error_string(ERR_get_error(), NULL));
-		EVP_CIPHER_CTX_cleanup(&cipher);
+		EVP_CIPHER_CTX_free(cipher);
 		free(output);
 		return NULL;
 	}
@@ -331,20 +336,20 @@ unsigned char *elli_decrypt(elli_ctx_t *ctx, char *key, verbum_t *encrypted, siz
 	block += output_length;
 
 	if (output_length != verbum_body_length(encrypted)) {
-		elli_error(int_ctx, "The symmetric cipher failed to properly decrypt the correct amount of data!\n");
-		EVP_CIPHER_CTX_cleanup(&cipher);
+		elli_error(int_ctx, "The symmetric cipher failed to properly decrypt the correct amount of data");
+		EVP_CIPHER_CTX_free(cipher);
 		free(output);
 		return NULL;
 	}
 
-	if (EVP_DecryptFinal_ex(&cipher, block, &output_length) != 1) {
+	if (EVP_DecryptFinal_ex(cipher, block, &output_length) != 1) {
 		elli_error(int_ctx, "Unable to decrypt the data using the chosen symmetric cipher: %s", ERR_error_string(ERR_get_error(), NULL));
-		EVP_CIPHER_CTX_cleanup(&cipher);
+		EVP_CIPHER_CTX_free(cipher);
 		free(output);
 		return NULL;
 	}
 
-	EVP_CIPHER_CTX_cleanup(&cipher);
+	EVP_CIPHER_CTX_free(cipher);
 
 	*length = verbum_orig_length(encrypted);
 	return output;

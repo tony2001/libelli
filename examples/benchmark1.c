@@ -1,3 +1,4 @@
+#include <sys/time.h>
 #include "elli.h"
 
 typedef struct {
@@ -31,7 +32,12 @@ int main()
 	for (i = 0; i < sizeof(keys)/sizeof(bench_key_t); i++) {
 		bench_key_t *key = keys + i;
 
-		ctx = elli_ctx_create(key->curve_name);
+		ctx = elli_ctx_create(key->curve_name, NULL);
+
+		if (!ctx) {
+			printf ("curve '%s' not found, skipping..\n", key->curve_name);
+			continue;
+		}
 
 		encrypted_data = elli_encrypt(ctx, key->public_key, (unsigned char *)data, data_len);
 		printf("%s (%d bytes)\n", key->curve_name, verbum_total_length(encrypted_data));

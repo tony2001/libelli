@@ -9,10 +9,15 @@ int main()
 	verbum_t *encrypted_data;
 	unsigned char *dec_data;
 	size_t dec_data_len;
+	char *err_str;
 
-	ctx = elli_ctx_create("secp112r1");
+	ctx = elli_ctx_create("secp112r1", &err_str);
+	if (!ctx) {
+		printf("Failed to initialize elli context. Error: %s\n", err_str);
+		return -1;
+	}
+
 	encrypted_data = elli_encrypt(ctx, pub_key, (unsigned char *)"test", sizeof("test") - 1);
-
 	if (!encrypted_data) {
 		printf("Failed to encrypt data. Error: %s\n", elli_ctx_last_error(ctx));
 		elli_ctx_free(ctx);

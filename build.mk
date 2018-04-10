@@ -15,7 +15,7 @@ all: $(targets)
 ltmain:
 	$(LIBTOOLIZE) --force --copy --quiet
 
-aclocal.m4: configure.in
+aclocal.m4: configure.ac
 	$(ACLOCAL)
 
 $(config_h_in): configure
@@ -23,7 +23,7 @@ $(config_h_in): configure
 	@rm -f $@
 	$(AUTOHEADER) $(SUPPRESS_WARNINGS)
 
-configure: aclocal.m4 configure.in ltmain
+configure: aclocal.m4 configure.ac ltmain
 	@echo rebuilding $@
 	$(AUTOCONF) $(SUPPRESS_WARNINGS)
 

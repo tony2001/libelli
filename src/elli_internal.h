@@ -10,6 +10,8 @@
 #include "elli_version.h"
 #include "elli.h"
 
+typedef char verbum_t;
+
 typedef struct {
 	struct {
 		uint64_t key;
@@ -37,6 +39,8 @@ uint64_t verbum_key_length(verbum_t *cryptex);
 uint64_t verbum_mac_length(verbum_t *cryptex);
 uint64_t verbum_body_length(verbum_t *cryptex);
 uint64_t verbum_orig_length(verbum_t *cryptex);
+uint64_t verbum_total_length(verbum_t *cryptex);
+int verbum_check_length(char *data, size_t data_len);
 void *verbum_alloc(uint64_t key, uint64_t mac, uint64_t orig, uint64_t body);
 
 int elli_group_init(elli_ctx_internal_t *ctx);

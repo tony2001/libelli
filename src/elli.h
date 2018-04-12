@@ -12,9 +12,7 @@
 //#define ECIES_CURVE NID_secp112r1
 #define ECIES_DEFAULT_CIPHER EVP_aes_256_cbc()
 
-typedef char* verbum_t;
 typedef char* elli_ctx_t;
-uint64_t verbum_total_length(verbum_t *encrypted);
 
 elli_ctx_t *elli_ctx_create(const char *curve_name, char **error_str);
 char *elli_ctx_last_error(elli_ctx_t *ctx);
@@ -32,7 +30,7 @@ void elli_ctx_free(elli_ctx_t *ctx);
    openssl ec -in key.pem -text -noout
  and remove the colons from the output.
  */
-verbum_t *elli_encrypt(elli_ctx_t *ctx, char *key, unsigned char *data, size_t length);
-unsigned char *elli_decrypt(elli_ctx_t *ctx, char *key, verbum_t *encrypted, size_t *length);
+char *elli_encrypt(elli_ctx_t *ctx, char *public_key_hex, char *data, size_t *length);
+char *elli_decrypt(elli_ctx_t *ctx, char *private_key_hex, char *encrypted, size_t *length);
 
 #endif /* ELLI_H */

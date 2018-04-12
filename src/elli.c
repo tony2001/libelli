@@ -61,7 +61,7 @@ void elli_ctx_free(elli_ctx_t *ctx) /* {{{ */
 }
 /* }}} */
 
-verbum_t *elli_encrypt(elli_ctx_t *ctx, char *key, unsigned char *data, size_t length) /* {{{ */
+char *elli_encrypt(elli_ctx_t *ctx, char *key, char *data, size_t *length) /* {{{ */
 {
 	void *body;
 	HMAC_CTX *hmac;
@@ -75,7 +75,7 @@ verbum_t *elli_encrypt(elli_ctx_t *ctx, char *key, unsigned char *data, size_t l
 	elli_ctx_internal_t *int_ctx = (elli_ctx_internal_t *)ctx;
 
 	// Simple sanity check.
-	if (!key || !data || !length) {
+	if (!key || !data || !length || !*length) {
 		elli_error(int_ctx, "Invalid parameters passed: key and data cannot be NULL, length must be > 0");
 		return NULL;
 	}
@@ -126,7 +126,7 @@ verbum_t *elli_encrypt(elli_ctx_t *ctx, char *key, unsigned char *data, size_t l
 	}
 
 	// We use a conditional to pad the length if the input buffer is notevenly divisible by the block size.
-	encrypted = verbum_alloc(envelope_length, EVP_MD_size(EVP_sha512()), length, length + (length % block_length ? (block_length - (length % block_length)) : 0));
+	encrypted = verbum_alloc(envelope_length, EVP_MD_size(EVP_sha512()), *length, *length + (*length % block_length ? (block_length - (*length % block_length)) : 0));
 	if (!encrypted) {
 		elli_error(int_ctx, "Unable to allocate a verbum_t buffer to hold the encrypted result");
 		EC_KEY_free(ephemeral);
@@ -158,7 +158,7 @@ verbum_t *elli_encrypt(elli_ctx_t *ctx, char *key, unsigned char *data, size_t l
 	// Initialize the cipher with the envelope key.
 	if (EVP_EncryptInit_ex(cipher, int_ctx->cipher, NULL, envelope_key, iv) != 1 ||
 		EVP_CIPHER_CTX_set_padding(cipher, 0) != 1 ||
-		EVP_EncryptUpdate(cipher, body, &body_length, data, length - (length % block_length)) != 1) {
+		EVP_EncryptUpdate(cipher, body, &body_length, (unsigned char *)data, *length - (*length % block_length)) != 1) {
 
 		elli_error(int_ctx, "Failed to secure the data using the chosen symmetric cipher: %s", ERR_error_string(ERR_get_error(), NULL));
 		EVP_CIPHER_CTX_free(cipher);
@@ -167,10 +167,10 @@ verbum_t *elli_encrypt(elli_ctx_t *ctx, char *key, unsigned char *data, size_t l
 	}
 
 	// Check whether all of the data was encrypted. If they don't match up, we either have a partial block remaining, or an error occurred.
-	if (body_length != length) {
+	if (body_length != *length) {
 
 		// Make sure all that remains is a partial block, and there wasn't an error.
-		if (length - body_length >= block_length) {
+		if ((*length - body_length) >= block_length) {
 			elli_error(int_ctx, "Unable to secure the data using the chosen symmetric cipher: %s", ERR_error_string(ERR_get_error(), NULL));
 			EVP_CIPHER_CTX_free(cipher);
 			free(encrypted);
@@ -179,7 +179,7 @@ verbum_t *elli_encrypt(elli_ctx_t *ctx, char *key, unsigned char *data, size_t l
 
 		// Copy the remaining data into our partial block buffer. The memset() call ensures any extra bytes will be zero'ed out.
 		memset(block, 0, EVP_MAX_BLOCK_LENGTH);
-		memcpy(block, data + body_length, length - body_length);
+		memcpy(block, data + body_length, *length - body_length);
 
 		// Advance the body pointer to the location of the remaining space, and calculate just how much room is still available.
 		body += body_length;
@@ -236,11 +236,13 @@ verbum_t *elli_encrypt(elli_ctx_t *ctx, char *key, unsigned char *data, size_t l
 
 	HMAC_CTX_free(hmac);
 
-	return encrypted;
+	*length = verbum_total_length(encrypted);
+
+	return (char *)encrypted;
 }
 /* }}} */
 
-unsigned char *elli_decrypt(elli_ctx_t *ctx, char *key, verbum_t *encrypted, size_t *length)  /* {{{ */
+char *elli_decrypt(elli_ctx_t *ctx, char *key, char *encrypted, size_t *length)  /* {{{ */
 {
 	HMAC_CTX *hmac;
 	size_t key_length;
@@ -252,7 +254,13 @@ unsigned char *elli_decrypt(elli_ctx_t *ctx, char *key, verbum_t *encrypted, siz
 	elli_ctx_internal_t *int_ctx = (elli_ctx_internal_t *)ctx;
 
 	// Simple sanity check.
-	if (!key || !encrypted || !length) {
+	if (!key || !encrypted || !length || !*length) {
+		elli_error(int_ctx, "Invalid parameters passed: key and data cannot be NULL, length must be > 0");
+		return NULL;
+	}
+
+	if (verbum_check_length(encrypted, *length) < 0) {
+		elli_error(int_ctx, "Encrypted data has been corrupted and cannot be decrypted");
 		return NULL;
 	}
 
@@ -352,7 +360,7 @@ unsigned char *elli_decrypt(elli_ctx_t *ctx, char *key, verbum_t *encrypted, siz
 	EVP_CIPHER_CTX_free(cipher);
 
 	*length = verbum_orig_length(encrypted);
-	return output;
+	return (char *)output;
 }
 /* }}} */
 

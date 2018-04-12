@@ -6,8 +6,9 @@ int main()
 	//char *wrong_priv_key = "00d0173b1bd0ac0640a4087417c10a";
 	char *pub_key = "04354854411b55dc7b7f5b5fbf45433ce7ced5950305ede546fead71f5";
 	elli_ctx_t *ctx;
-	verbum_t *encrypted_data;
-	unsigned char *dec_data;
+	char *encrypted_data;
+	char *dec_data;
+	size_t data_len;
 	size_t dec_data_len;
 	char *err_str;
 
@@ -17,13 +18,15 @@ int main()
 		return -1;
 	}
 
-	encrypted_data = elli_encrypt(ctx, pub_key, (unsigned char *)"test", sizeof("test") - 1);
+	data_len = sizeof("test") - 1;
+	encrypted_data = elli_encrypt(ctx, pub_key, "test", &data_len);
 	if (!encrypted_data) {
 		printf("Failed to encrypt data. Error: %s\n", elli_ctx_last_error(ctx));
 		elli_ctx_free(ctx);
 		return -1;
 	}
 
+	dec_data_len = data_len;
 	dec_data = elli_decrypt(ctx, priv_key, encrypted_data, &dec_data_len);
 	if (dec_data) {
 		printf("%s\n", dec_data);

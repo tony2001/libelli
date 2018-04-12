@@ -20,10 +20,10 @@ char data[] = "Elliptic curve cryptography (ECC) is an approach to public-key cr
 int main()
 {
 	elli_ctx_t *ctx;
-	verbum_t *encrypted_data;
-	unsigned char *dec_data;
-	size_t dec_data_len;
-	int i, j, data_len;
+	char *encrypted_data;
+	char *dec_data;
+	size_t dec_data_len, data_len;
+	int i, j;
 	double start, end;
 	struct timeval tv;
 
@@ -39,8 +39,8 @@ int main()
 			continue;
 		}
 
-		encrypted_data = elli_encrypt(ctx, key->public_key, (unsigned char *)data, data_len);
-		printf("%s (%d bytes)\n", key->curve_name, verbum_total_length(encrypted_data));
+		encrypted_data = elli_encrypt(ctx, key->public_key, data, &data_len);
+		printf("%s (%zd bytes)\n", key->curve_name, data_len);
 		free(encrypted_data);
 		
 		printf("  encrypting %d times\n", REPEAT);
@@ -49,7 +49,8 @@ int main()
 		start = tv_to_double(&tv);
 
 		for (j = 0; j < REPEAT; j++) {
-			encrypted_data = elli_encrypt(ctx, key->public_key, (unsigned char *)data, data_len);
+			data_len = strlen(data);
+			encrypted_data = elli_encrypt(ctx, key->public_key, data, &data_len);
 			free(encrypted_data);
 		}
 		gettimeofday(&tv, NULL);
@@ -58,12 +59,13 @@ int main()
 		
 		printf("  decrypting %d times\n", REPEAT);
 
-		encrypted_data = elli_encrypt(ctx, key->public_key, (unsigned char *)data, data_len);
+		encrypted_data = elli_encrypt(ctx, key->public_key, data, &data_len);
 		
 		gettimeofday(&tv, NULL);
 		start = tv_to_double(&tv);
 		
 		for (j = 0; j < REPEAT; j++) {
+			dec_data_len = data_len;
 			dec_data = elli_decrypt(ctx, key->private_key, encrypted_data, &dec_data_len);
 			free(dec_data);
 		}

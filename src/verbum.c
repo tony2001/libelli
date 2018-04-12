@@ -41,6 +41,19 @@ void * verbum_key_data(verbum_t *encrypted) /* {{{ */
 }
 /* }}} */
 
+int verbum_check_length(char *encrypted, size_t data_len) /* {{{ */
+{
+	if (data_len <= sizeof(verbum_head_t)) {
+		return -1;
+	}
+
+	if (data_len != verbum_total_length(encrypted)) {
+		return -1;
+	}
+	return 0;
+}
+/* }}} */
+
 void * verbum_mac_data(verbum_t *encrypted) /* {{{ */
 {
 	verbum_head_t *head = (verbum_head_t *)encrypted;

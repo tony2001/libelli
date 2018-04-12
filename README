@@ -1,2 +1,52 @@
 libelli - high level elliptic cryptography library using OpenSSL.
 Heavily based on Ladar Levison's ECIES module code.
+
+
+INSTALLATION
+------------
+./buildconf
+./configure
+make install
+
+
+GENERATING KEYS
+---------------
+
+1. Using online utility
+-----------------------
+
+Use the scripts here:
+https://kjur.github.io/jsrsasign/sample/sample-ecdsa.html
+
+EC private and public keys are immediately usable.
+
+
+2. Using OpenSSL
+----------------
+Generate private key:
+openssl ecparam -genkey -name secp256k1 -out myprivatekey.pem
+
+Get HEX strings for private and public keys:
+openssl ec -in myprivatekey.pem -text
+You'll get something like this:
+........
+Private-Key: (256 bit)
+priv:
+    b7:94:70:e1:44:e7:cf:b0:01:cb:ee:cc:9f:a9:f9:
+    13:2e:dd:b4:ac:d2:a2:57:fb:3e:de:03:b2:8f:2e:
+    12:98
+pub:
+    04:55:c2:e0:dc:b5:9d:81:96:a4:ab:8a:00:52:48:
+    ec:a3:f3:37:38:83:02:f7:a3:f3:dd:2f:c5:aa:20:
+    36:a2:d6:94:6b:4e:4a:e6:38:5e:8a:f8:9e:e5:52:
+    c3:e0:4a:3d:f5:56:41:fe:13:d8:c7:9e:bb:58:c6:
+    51:0e:88:0f:14
+........
+
+Remove colons and new lines to get your private key in hex:
+b79470e144e7cfb001cbeecc9fa9f9132eddb4acd2a257fb3ede03b28f2e1298
+
+Do the same to get your public key:
+0455c2e0dcb59d8196a4ab8a005248eca3f337388302f7a3f3dd2fc5aa2036a2d6946b4e4ae6385e8af89ee552c3e04a3df55641fe13d8c79ebb58c6510e880f14
+
+Note: don't try to use the keys above, they're broken intentionally, generate your own.

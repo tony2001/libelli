@@ -27,7 +27,7 @@ typedef struct {
 	int curve_type;
 	const EVP_CIPHER *cipher;
 	EC_GROUP *elliptic;
-	char last_error[1024];
+	char last_error[ELLI_ERROR_BUF_SIZE];
 } elli_ctx_internal_t;
 
 #define elli_error(ctx, ...) snprintf((ctx)->last_error, sizeof((ctx)->last_error), __VA_ARGS__)

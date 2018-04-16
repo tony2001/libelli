@@ -19,7 +19,13 @@ elli_ctx_t *elli_ctx_create(const char *curve_name, char **error_str) /* {{{ */
 	curve = OBJ_sn2nid(curve_name);
 
 	if (curve == NID_undef) {
-		curve = ECIES_DEFAULT_CURVE;
+		if (error_str) {
+			*error_str = malloc(ELLI_ERROR_BUF_SIZE);
+			if (*error_str) {
+				sprintf(*error_str, "curve '%s' not found", curve_name);
+			}
+		}
+		return NULL;
 	}
 
 	int_ctx = calloc(1, sizeof(*int_ctx));
